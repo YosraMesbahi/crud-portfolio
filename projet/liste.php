@@ -2,7 +2,18 @@
 session_start();
 if (!isset($_SESSION['login'])) { header("Location: ../login.php"); exit(); }
 include_once('../connexion.php');
-$liste = mysqli_query($conn, "SELECT * FROM projet ORDER BY ordre ASC, id DESC");
+
+// Récupérer tous les projets avec leur type et compétences
+$liste = mysqli_query($conn, "
+    SELECT p.id, p.titre, p.image, p.lien_demo, p.lien_github, p.date, t.nom AS type,
+           GROUP_CONCAT(c.tech SEPARATOR ', ') AS competences
+    FROM projet p
+    LEFT JOIN type_projet t ON p.type_id = t.id
+    LEFT JOIN projet_competence pc ON p.id = pc.projet_id
+    LEFT JOIN competences c ON pc.competence_id = c.id
+    GROUP BY p.id
+    ORDER BY p.date DESC
+");
 mysqli_close($conn);
 ?>
 <!DOCTYPE html>
@@ -28,31 +39,34 @@ mysqli_close($conn);
             <?php if (mysqli_num_rows($liste) > 0): ?>
                 <table class="table">
                     <thead>
-                        <tr><th>ID</th><th>Image</th><th>Titre</th><th>Type</th><th>Visible</th><th>Actions</th></tr>
+                        <tr>
+                            <th>ID</th>
+                            <th>Titre</th>
+                            <th>Type</th>
+                            <th>Compétences</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
                     </thead>
                     <tbody>
-                    <?php while ($projet = mysqli_fetch_assoc($liste)): ?>
+                    <?php while ($p = mysqli_fetch_assoc($liste)): ?>
                         <tr>
-                            <td><?php echo $projet['id']; ?></td>
+                            <td><?php echo $p['id']; ?></td>
+                            <td><?php echo htmlspecialchars($p['titre']); ?></td>
+                            <td><?php echo htmlspecialchars($p['type']); ?></td>
+                            <td><?php echo htmlspecialchars($p['competences']); ?></td>
+                            <td><?php echo htmlspecialchars($p['date']); ?></td>
                             <td>
-                                <?php if ($projet['image']): ?>
-                                    <img src="../<?php echo htmlspecialchars($projet['image']); ?>" style="width:60px;height:60px;object-fit:cover;border-radius:0.5rem;">
-                                <?php else: ?><em>—</em><?php endif; ?>
-                            </td>
-                            <td><strong><?php echo htmlspecialchars($projet['titre']); ?></strong></td>
-                            <td><?php echo htmlspecialchars($projet['type']); ?></td>
-                            <td><?php echo $projet['visible'] ? '✅' : '❌'; ?></td>
-                            <td>
-                                <a href="modifier.php?id=<?php echo $projet['id']; ?>" class="btn btn-edit">Modifier</a>
-                                <a href="supprimer.php?id=<?php echo $projet['id']; ?>" class="btn btn-delete"
-                                   onclick="return confirm('Supprimer ce projet ?')">Supprimer</a>
+                                <a href="modifier.php?id=<?php echo $p['id']; ?>" class="btn btn-edit">Modifier</a>
+                                <a href="supprimer.php?id=<?php echo $p['id']; ?>" class="btn btn-delete"
+                                   onclick="return confirm('Supprimer ?')">Supprimer</a>
                             </td>
                         </tr>
                     <?php endwhile; ?>
                     </tbody>
                 </table>
             <?php else: ?>
-                <p class="no-data">Aucun projet pour le moment.</p>
+                <p class="no-data">Aucun projet.</p>
             <?php endif; ?>
         </div>
     </div>
