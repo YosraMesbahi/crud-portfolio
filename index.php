@@ -187,6 +187,10 @@
           $sujet_admin = "Nouveau message de $form_prenom $form_nom depuis le portfolio";
           $corps_admin = "Prénom : $form_prenom\nNom : $form_nom\nEmail : $form_email\n\nMessage :\n$form_message";
           mail($admin_email, $sujet_admin, $corps_admin, $headers);
+          $stmt = mysqli_prepare($conn, "INSERT INTO messages (prenom, nom, email, message) VALUES (?, ?, ?, ?)");
+          mysqli_stmt_bind_param($stmt, "ssss", $form_prenom, $form_nom, $form_email, $form_message);
+          mysqli_stmt_execute($stmt);
+          mysqli_stmt_close($stmt);
 
           $sujet_user = "Votre message a bien été reçu";
           $corps_user = "Bonjour $form_prenom $form_nom,\n\nMerci pour votre message ! Je reviendrai vers vous très prochainement.\n\nCordialement,\nYosra Mesbahi";
