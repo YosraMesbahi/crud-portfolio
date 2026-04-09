@@ -3,46 +3,82 @@ session_start();
 if (!isset($_SESSION['login'])) { header("Location: ../login.php"); exit(); }
 include_once('../connexion.php');
 
-if (!isset($_GET['id'])) { header("Location: liste.php"); exit(); }
+if (!isset($_GET['id'])) { header("Location: projets.php"); exit(); }
+
 $id = intval($_GET['id']);
-$projet = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM projet WHERE id = $id LIMIT 1"));
-if (!$projet) { header("Location: liste.php"); exit(); }
+
+/* PROJET */
+$projet = mysqli_fetch_assoc(mysqli_query($conn, "
+    SELECT * FROM projet WHERE id = $id LIMIT 1
+"));
+if (!$projet) { header("Location: projets.php"); exit(); }
+
+/* TYPES */
+$types = mysqli_query($conn, "SELECT * FROM type_projet ORDER BY nom");
+
+/* COMPÉTENCES */
+$competences = mysqli_query($conn, "SELECT * FROM competences ORDER BY type, id");
+
+/* COMPÉTENCES SÉLECTIONNÉES */
+$selected = [];
+$resSel = mysqli_query($conn, "SELECT competence_id FROM projet_competence WHERE projet_id=$id");
+while ($r = mysqli_fetch_assoc($resSel)) {
+    $selected[] = $r['competence_id'];
+}
 
 $message = "";
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $titre       = mysqli_real_escape_string($conn, $_POST['titre']);
-    $type        = mysqli_real_escape_string($conn, $_POST['type']);
-    $description = mysqli_real_escape_string($conn, $_POST['description']);
-    $github      = mysqli_real_escape_string($conn, $_POST['github']);
-    $demo        = mysqli_real_escape_string($conn, $_POST['demo']);
-    $ordre       = (int)$_POST['ordre'];
-    $visible     = isset($_POST['visible']) ? 1 : 0;
-    $image_path  = $projet['image'];
 
-    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        $ext = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
-        if (in_array($ext, ['jpg','jpeg','png','webp']) && $_FILES['image']['size'] <= 5*1024*1024) {
-            $filename = 'projet-' . time() . '.' . $ext;
-            if (move_uploaded_file($_FILES['image']['tmp_name'], '../assets/uploads/' . $filename)) {
-                $image_path = './assets/uploads/' . $filename;
-            }
-        }
+/* UPDATE */
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $titre       = mysqli_real_escape_string($conn, $_POST['titre']);
+    $image       = mysqli_real_escape_string($conn, $_POST['image']);
+    $lien_demo   = mysqli_real_escape_string($conn, $_POST['lien_demo']);
+    $lien_github = mysqli_real_escape_string($conn, $_POST['lien_github']);
+    $type_id     = (int)$_POST['type_id'];
+    $date        = mysqli_real_escape_string($conn, $_POST['date']);
+
+    $req = mysqli_query($conn, "
+        UPDATE projet SET
+        titre='$titre',
+        image='$image',
+        lien_demo='$lien_demo',
+        lien_github='$lien_github',
+        type_id=$type_id,
+        date='$date'
+        WHERE id=$id
+    ");
+
+    /* RESET COMPÉTENCES */
+    mysqli_query($conn, "DELETE FROM projet_competence WHERE projet_id=$id");
+
+    $comp_array = $_POST['competences'] ?? [];
+
+    foreach ($comp_array as $comp_id) {
+        $comp_id = (int)$comp_id;
+        mysqli_query($conn, "
+            INSERT INTO projet_competence (projet_id, competence_id)
+            VALUES ($id, $comp_id)
+        ");
     }
 
-    $image_escape = mysqli_real_escape_string($conn, $image_path);
-    $requete = "UPDATE projet SET titre='$titre', type='$type', description='$description',
-                github='$github', demo='$demo', ordre=$ordre, visible=$visible, image='$image_escape'
-                WHERE id=$id";
+    $message = $req ? "Projet modifié !" : "Erreur : " . mysqli_error($conn);
 
-    if (mysqli_query($conn, $requete)) {
-        $message = "Projet modifié !";
-        $projet = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM projet WHERE id = $id LIMIT 1"));
-    } else {
-        $message = "Erreur : " . mysqli_error($conn);
+    /* refresh */
+    $projet = mysqli_fetch_assoc(mysqli_query($conn, "
+        SELECT * FROM projet WHERE id = $id LIMIT 1
+    "));
+
+    $selected = [];
+    $resSel = mysqli_query($conn, "SELECT competence_id FROM projet_competence WHERE projet_id=$id");
+    while ($r = mysqli_fetch_assoc($resSel)) {
+        $selected[] = $r['competence_id'];
     }
 }
+
 mysqli_close($conn);
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -52,69 +88,91 @@ mysqli_close($conn);
     <link rel="stylesheet" href="../style-back.css">
 </head>
 <body>
-    <header class="back-header">
-        <h1>Modifier un projet</h1>
-        <nav class="back-nav">
-            <a href="../dashboard.php">← Dashboard</a>
-            <a href="liste.php">← Liste</a>
-            <a href="../logout.php">Se déconnecter</a>
-        </nav>
-    </header>
-    <div class="back-container">
-        <?php if ($message): ?>
-            <div class="alert <?php echo strpos($message,'Erreur') !== false ? 'alert-error' : 'alert-success'; ?>">
-                <?php echo $message; ?>
-            </div>
-        <?php endif; ?>
-        <div class="back-card">
-            <form action="" method="POST" enctype="multipart/form-data">
-                <div class="form-group">
-                    <label>Titre :</label>
-                    <input type="text" name="titre" value="<?php echo htmlspecialchars($projet['titre']); ?>" required>
-                </div>
-                <div class="form-group">
-                    <label>Type :</label>
-                    <select name="type">
-                        <option value="code" <?php echo $projet['type']==='code'?'selected':''; ?>>Code</option>
-                        <option value="design" <?php echo $projet['type']==='design'?'selected':''; ?>>Design</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Description :</label>
-                    <textarea name="description" rows="4"><?php echo htmlspecialchars($projet['description']); ?></textarea>
-                </div>
-                <div class="form-group">
-                    <label>GitHub :</label>
-                    <input type="url" name="github" value="<?php echo htmlspecialchars($projet['github']); ?>">
-                </div>
-                <div class="form-group">
-                    <label>Démo :</label>
-                    <input type="url" name="demo" value="<?php echo htmlspecialchars($projet['demo']); ?>">
-                </div>
-                <div class="form-group">
-                    <label>Nouvelle image <small>(laisser vide pour garder l'actuelle)</small> :</label>
-                    <input type="file" name="image" accept="image/jpeg,image/png,image/webp">
-                    <?php if ($projet['image']): ?>
-                        <small>Actuelle : <a href="../<?php echo htmlspecialchars($projet['image']); ?>" target="_blank">voir</a></small>
-                    <?php endif; ?>
-                </div>
-                <div class="form-group">
-                    <label>Ordre :</label>
-                    <input type="number" name="ordre" value="<?php echo $projet['ordre']; ?>">
-                </div>
-                <div class="form-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="visible" value="1" <?php echo $projet['visible']?'checked':''; ?>>
-                        <span>Visible sur le portfolio</span>
-                    </label>
-                </div>
-                <div class="btn-container">
-                    <button type="submit" class="btn btn-success">Enregistrer</button>
-                    <a href="liste.php" class="btn btn-secondary">Annuler</a>
-                </div>
-            </form>
-        </div>
+
+<header class="back-header">
+    <h1>Modifier un projet</h1>
+    <nav class="back-nav">
+        <a href="liste.php">← Liste</a>
+        <a href="../dashboard.php">Dashboard</a>
+        <a href="../logout.php">Se déconnecter</a>
+    </nav>
+</header>
+
+<div class="back-container">
+
+<?php if ($message): ?>
+    <div class="alert <?php echo strpos($message,'Erreur') !== false ? 'alert-error' : 'alert-success'; ?>">
+        <?php echo $message; ?>
     </div>
-    <footer class="back-footer"><p>Back Office Portfolio - <?php echo date('Y'); ?></p></footer>
+<?php endif; ?>
+
+<div class="back-card">
+
+<form method="POST">
+
+    <div class="form-group">
+        <label>Titre :</label>
+        <input type="text" name="titre" value="<?php echo htmlspecialchars($projet['titre']); ?>" required>
+    </div>
+
+    <div class="form-group">
+        <label>Image :</label>
+        <input type="text" name="image" value="<?php echo htmlspecialchars($projet['image']); ?>">
+    </div>
+
+    <div class="form-group">
+        <label>Lien démo :</label>
+        <input type="text" name="lien_demo" value="<?php echo htmlspecialchars($projet['lien_demo']); ?>">
+    </div>
+
+    <div class="form-group">
+        <label>Lien GitHub :</label>
+        <input type="text" name="lien_github" value="<?php echo htmlspecialchars($projet['lien_github']); ?>">
+    </div>
+
+    <div class="form-group">
+        <label>Type :</label>
+        <select name="type_id">
+            <?php while ($t = mysqli_fetch_assoc($types)): ?>
+                <option value="<?php echo $t['id']; ?>"
+                    <?php echo ($t['id'] == $projet['type_id']) ? 'selected' : ''; ?>>
+                    <?php echo htmlspecialchars($t['nom']); ?>
+                </option>
+            <?php endwhile; ?>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Date :</label>
+        <input type="date" name="date" value="<?php echo htmlspecialchars($projet['date']); ?>">
+    </div>
+
+    <div class="form-group">
+        <label>Compétences :</label><br>
+
+        <?php mysqli_data_seek($competences, 0); ?>
+        <?php while ($c = mysqli_fetch_assoc($competences)): ?>
+            <input type="checkbox" name="competences[]"
+                   value="<?php echo $c['id']; ?>"
+                   <?php echo in_array($c['id'], $selected) ? 'checked' : ''; ?>>
+            <?php echo htmlspecialchars($c['tech']); ?><br>
+        <?php endwhile; ?>
+
+    </div>
+
+    <div class="btn-container">
+        <button type="submit" class="btn btn-success">Enregistrer</button>
+        <a href="projets.php" class="btn btn-secondary">Annuler</a>
+    </div>
+
+</form>
+
+</div>
+</div>
+
+<footer class="back-footer">
+    <p>Back Office Portfolio - <?php echo date('Y'); ?></p>
+</footer>
+
 </body>
 </html>

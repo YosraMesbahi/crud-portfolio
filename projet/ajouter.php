@@ -48,7 +48,7 @@ mysqli_close($conn);
         <h1>Ajouter un projet</h1>
         <nav class="back-nav">
             <a href="../dashboard.php">← Dashboard</a>
-            <a href="projets.php">Voir la liste</a>
+            <a href="liste.php">Voir la liste</a>
             <a href="../logout.php">Se déconnecter</a>
         </nav>
     </header>
