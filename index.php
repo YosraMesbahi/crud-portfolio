@@ -21,8 +21,8 @@ $projects = $projet->getAll();
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Portfolio MMI | Yosra Mesbahi</title>
-  <link rel="stylesheet" href="../includes/style.css" />
-  <link rel="stylesheet" href="../includes/mediaqueries.css" />
+  <link rel="stylesheet" href="includes/style.css" />
+  <link rel="stylesheet" href="includes/mediaqueries.css" />
 </head>
 <body>
 
