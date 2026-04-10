@@ -75,9 +75,9 @@ mysqli_close($conn);
     <header class="back-header">
         <h1>Gestion du Profil</h1>
         <nav class="back-nav">
-            <a href="dashboard.php">← Dashboard</a>
-            <a href="index.php">Voir le portfolio</a>
-            <a href="logout.php">Se déconnecter</a>
+        <a href="../dashboard.php">← Dashboard</a>
+        <a href="../index.php">Voir le portfolio</a>
+        <a href="../logout.php">Se déconnecter</a>
         </nav>
     </header>
 

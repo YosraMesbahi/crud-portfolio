@@ -25,7 +25,7 @@ $liste = $projet->getAll();
     <h1>Liste des projets</h1>
     <nav class="back-nav">
         <a href="../dashboard.php">← Dashboard</a>
-        <a href="ajouter.php">+ Ajouter</a>
+        <a href="../index.php">Voir le portfolio</a>
         <a href="../logout.php">Se déconnecter</a>
     </nav>
 </header>
@@ -34,6 +34,7 @@ $liste = $projet->getAll();
     <div class="back-card">
 
         <h2>Tous les projets</h2>
+        <a href="ajouter.php">+ Ajouter</a>        
 
         <?php if ($liste && $liste->num_rows > 0): ?>
             <table class="table">

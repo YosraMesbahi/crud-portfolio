@@ -29,6 +29,7 @@ mysqli_close($conn);
     <h1>Types de projet</h1>
     <nav class="back-nav">
         <a href="../dashboard.php">← Dashboard</a>
+        <a href="../index.php">Voir le portfolio</a>
         <a href="../logout.php">Se déconnecter</a>
     </nav>
 </header>
