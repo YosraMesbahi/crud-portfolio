@@ -1,29 +1,16 @@
 <?php
 session_start();
 if (!isset($_SESSION['login'])) { header("Location: ../login.php"); exit(); }
-include_once('../connexion.php');
 
-$liste = mysqli_query($conn, "
-    SELECT 
-        p.id,
-        p.titre,
-        p.image,
-        p.lien_demo,
-        p.lien_github,
-        p.date,
-        t.nom AS type,
-        COALESCE(GROUP_CONCAT(c.tech SEPARATOR ', '), '') AS competences
-    FROM projet p
-    LEFT JOIN type_projet t ON p.type_id = t.id
-    LEFT JOIN projet_competence pc ON p.id = pc.projet_id
-    LEFT JOIN competences c ON pc.competence_id = c.id
-    GROUP BY p.id
-    ORDER BY p.date DESC
-");
+include_once('../classes/Database.php');
+include_once('../classes/Projet.php');
 
-mysqli_close($conn);
+$db = new Database();
+$conn = $db->connect();
+
+$projet = new Projet($conn);
+$liste = $projet->getAll();
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -44,61 +31,59 @@ mysqli_close($conn);
 </header>
 
 <div class="back-container">
-<div class="back-card">
+    <div class="back-card">
 
-<h2>Tous les projets</h2>
+        <h2>Tous les projets</h2>
 
-<?php if (mysqli_num_rows($liste) > 0): ?>
+        <?php if ($liste && $liste->num_rows > 0): ?>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Titre</th>
+                        <th>Type</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Titre</th>
-            <th>Type</th>
-            <th>Compétences</th>
-            <th>Date</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
+                <tbody>
+                <?php while ($p = $liste->fetch_assoc()): ?>
+                    <tr>
+                        <td><?php echo $p['id']; ?></td>
 
-    <tbody>
-    <?php while ($p = mysqli_fetch_assoc($liste)): ?>
-        <tr>
-            <td><?php echo $p['id']; ?></td>
+                        <td>
+                            <?php echo htmlspecialchars($p['titre'] ?? ''); ?>
+                        </td>
 
-            <td>
-                <?php echo htmlspecialchars($p['titre'] ?? ''); ?>
-            </td>
+                        <td>
+                            <?php echo htmlspecialchars($p['type'] ?? ''); ?>
+                        </td>
 
-            <td>
-                <?php echo htmlspecialchars($p['type'] ?? ''); ?>
-            </td>
+                        <td>
+                            <?php echo htmlspecialchars($p['date'] ?? ''); ?>
+                        </td>
 
-            <td>
-                <?php echo htmlspecialchars($p['competences'] ?? ''); ?>
-            </td>
+                        <td>
+                            <a href="modifier.php?id=<?php echo $p['id']; ?>" class="btn btn-edit">
+                                Modifier
+                            </a>
 
-            <td>
-                <?php echo htmlspecialchars($p['date'] ?? ''); ?>
-            </td>
+                            <a href="supprimer.php?id=<?php echo $p['id']; ?>" class="btn btn-delete"
+                               onclick="return confirm('Supprimer ce projet ?')">
+                                Supprimer
+                            </a>
+                        </td>
+                    </tr>
+                <?php endwhile; ?>
+                </tbody>
+            </table>
 
-            <td>
-                <a href="modifier.php?id=<?php echo $p['id']; ?>" class="btn btn-edit">Modifier</a>
-                <a href="supprimer.php?id=<?php echo $p['id']; ?>" class="btn btn-delete"
-                   onclick="return confirm('Supprimer ?')">Supprimer</a>
-            </td>
-        </tr>
-    <?php endwhile; ?>
-    </tbody>
+        <?php else: ?>
+            <p class="no-data">Aucun projet trouvé.</p>
+        <?php endif; ?>
 
-</table>
-
-<?php else: ?>
-    <p class="no-data">Aucun projet.</p>
-<?php endif; ?>
-
-</div>
+    </div>
 </div>
 
 <footer class="back-footer">

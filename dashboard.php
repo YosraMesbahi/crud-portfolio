@@ -47,7 +47,7 @@ if (!isset($_SESSION['login'])) {
             </div>
             <div class="dashboard-item">
                 <h2>Navigation</h2>
-                <a href="crud-menu.php" class="btn btn-secondary" style="margin-top:0.5rem;">Gérer</a>
+                <a href="navigation/crud-menu.php" class="btn btn-secondary" style="margin-top:0.5rem;">Gérer</a>
             </div> 
             <div class="dashboard-item">
                 <h2>Type de projets</h2>

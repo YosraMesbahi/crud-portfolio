@@ -1,6 +1,19 @@
-<?php include_once('social-media.php'); ?>
-<?php include('profil.php'); ?>
-<?php include('competences.php'); ?>
+<?php 
+include_once('social-media.php'); 
+include('profil.php'); 
+include('competences.php'); 
+
+// 🔥 POO PROJETS
+include_once('classes/Database.php');
+include_once('classes/Projet.php');
+
+$db = new Database();
+$conn = $db->connect();
+
+$projet = new Projet($conn);
+$projects = $projet->getAll();
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -12,151 +25,148 @@
   <link rel="stylesheet" href="mediaqueries.css" />
 </head>
 <body>
-  <header>
-    <nav id="desktop-nav">
-      <div>
-        <a href="index.php" class="logo">Yosra Mesbahi</a>
-      </div>
-      <div>
-        <ul class="nav-links">
-          <?php
-          include_once('menu_nav.php');
-          $menuItems = getMenuItems($conn);
-          if ($menuItems) {
-              mysqli_data_seek($menuItems, 0);
-              while ($item = mysqli_fetch_assoc($menuItems)) {
-                  echo '<li><a href="' . htmlspecialchars($item['ancre']) . '">'
-                       . htmlspecialchars($item['menu_item']) . '</a></li>';
-              }
-          }
-          ?>
-        </ul>
-      </div>
-    </nav>
 
-    <nav id="hamburger-nav">
-      <div>
-        <a href="index.php" class="logo">Yosra Mesbahi</a>
-      </div>
-      <div class="hamburger-menu">
-        <div class="hamburger-icon" onclick="toggleMenu()">
-          <span></span><span></span><span></span>
-        </div>
-        <div class="menu-links">
-          <ul>
-            <?php
-            if ($menuItems) {
-                mysqli_data_seek($menuItems, 0);
-                while ($item = mysqli_fetch_assoc($menuItems)) {
-                    echo '<li><a href="' . htmlspecialchars($item['ancre']) . '" onclick="toggleMenu()">'
-                         . htmlspecialchars($item['menu_item']) . '</a></li>';
-                }
+<header>
+  <nav id="desktop-nav">
+    <div>
+      <a href="index.php" class="logo">Yosra Mesbahi</a>
+    </div>
+    <div>
+      <ul class="nav-links">
+        <?php
+        include_once('menu_nav.php');
+        $menuItems = getMenuItems($conn);
+        if ($menuItems) {
+            mysqli_data_seek($menuItems, 0);
+            while ($item = mysqli_fetch_assoc($menuItems)) {
+                echo '<li><a href="' . htmlspecialchars($item['ancre']) . '">'
+                     . htmlspecialchars($item['menu_item']) . '</a></li>';
             }
-            ?>
-          </ul>
-        </div>
-      </div>
-    </nav>
-  </header>
+        }
+        ?>
+      </ul>
+    </div>
+  </nav>
+</header>
 
-  <main>
-    <section id="profile">
-      <div class="section__text">
-        <p class="section__text__p1">Bonjour, je suis</p>
-        <h1 class="title"><?php echo htmlspecialchars($profil['titre']); ?></h1>
-        <p class="section__text__p2"><?php echo htmlspecialchars($profil['statut']); ?></p>
-        <p class="section__text__p1"><?php echo nl2br(htmlspecialchars($profil['presentation'])); ?></p>
-        <div class="btn-container">
-          <button class="btn btn-color-2" onclick="window.open('<?php echo htmlspecialchars($profil['CV']); ?>', '_blank')">
-            Mon CV
-          </button>
-        </div>
-        <div id="socials-container">
-          <?php
-          $query = "SELECT * FROM socials";
-          $result = mysqli_query($conn, $query);
-          if ($result && mysqli_num_rows($result) > 0) {
-              while ($row = mysqli_fetch_assoc($result)) {
-                  echo '<a href="' . htmlspecialchars($row['url']) . '" target="_blank" rel="noopener noreferrer">';
-                  echo '<img src="' . htmlspecialchars($row['icon_path']) . '" alt="' . htmlspecialchars($row['nom']) . '" class="icon" />';
-                  echo '</a>';
-              }
-          }
-          ?>
-        </div>
-      </div>
-    </section>
+<main>
 
+<!-- PROFIL -->
+<section id="profile">
+  <div class="section__text">
+    <p class="section__text__p1">Bonjour, je suis</p>
+    <h1 class="title"><?php echo htmlspecialchars($profil['titre']); ?></h1>
+    <p class="section__text__p2"><?php echo htmlspecialchars($profil['statut']); ?></p>
+    <p class="section__text__p1"><?php echo nl2br(htmlspecialchars($profil['presentation'])); ?></p>
+
+    <div class="btn-container">
+      <button class="btn btn-color-2" onclick="window.open('<?php echo htmlspecialchars($profil['CV']); ?>', '_blank')">
+        Mon CV
+      </button>
+    </div>
+
+    <div id="socials-container">
+      <?php
+      $result = mysqli_query($conn, "SELECT * FROM socials");
+      while ($row = mysqli_fetch_assoc($result)) {
+          echo '<a href="' . htmlspecialchars($row['url']) . '" target="_blank">';
+          echo '<img src="' . htmlspecialchars($row['icon_path']) . '" class="icon" />';
+          echo '</a>';
+      }
+      ?>
+    </div>
+  </div>
+</section>
+
+<!-- COMPETENCES -->
 <section id="experience">
   <p class="section__text__p1">Découvrez</p>
   <h1 class="title">Mes compétences</h1>
+
   <div class="experience-details-container">
     <div class="about-containers">
 
       <?php
-      // Récupération des types distincts de compétences
       $types = ['Front-end', 'Back-End', 'Outils', 'Design'];
 
       foreach ($types as $type) {
-          // On vérifie s'il y a des compétences pour ce type
-          $type_escape = mysqli_real_escape_string($conn, $type);
-          $req = mysqli_query($conn, "SELECT * FROM competences WHERE type = '$type_escape' ORDER BY id ASC");
+          $req = mysqli_query($conn, "SELECT * FROM competences WHERE type='$type'");
 
           if (mysqli_num_rows($req) > 0) {
               echo '<div class="details-container">';
-              echo '<h2 class="experience-sub-title">' . htmlspecialchars($type) . '</h2>';
+              echo '<h2 class="experience-sub-title">' . $type . '</h2>';
               echo '<div class="article-container">';
 
-              while ($competence = mysqli_fetch_assoc($req)) {
+              while ($c = mysqli_fetch_assoc($req)) {
                   echo '<article>';
-                  echo '<img src="./assets/checkmark.png" alt="Check" class="icon" />';
+                  echo '<img src="./assets/checkmark.png" class="icon" />';
                   echo '<div>';
-                  echo '<h3>' . htmlspecialchars($competence['tech']) . '</h3>';
-                  echo '<p>' . htmlspecialchars($competence['niveau']) . '</p>';
+                  echo '<h3>' . htmlspecialchars($c['tech']) . '</h3>';
+                  echo '<p>' . htmlspecialchars($c['niveau']) . '</p>';
                   echo '</div>';
                   echo '</article>';
               }
 
-              echo '</div>';
-              echo '</div>';
+              echo '</div></div>';
           }
       }
       ?>
 
     </div>
   </div>
-  <img src="./assets/arrow.png" alt="Arrow" class="icon arrow" onclick="location.href='#projects'" />
 </section>
 
-    <section id="projects">
-      <p class="section__text__p1">Découvrez</p>
-      <h1 class="title">Mes projets</h1>
-      <div class="experience-details-container">
-        <div class="about-containers">
+<!-- 🔥 PROJETS POO -->
+<section id="projects">
+  <p class="section__text__p1">Découvrez</p>
+  <h1 class="title">Mes projets</h1>
+
+  <div class="experience-details-container">
+    <div class="about-containers">
+
+      <?php if ($projects && $projects->num_rows > 0): ?>
+        <?php while ($p = $projects->fetch_assoc()): ?>
+
           <div class="details-container color-container">
+
             <div class="article-container">
-              <img src="./assets/Projet-3.png" alt="Projet 1" class="project-img" />
+              <img src="<?php echo htmlspecialchars($p['image'] ?? './assets/default.png'); ?>"
+                   alt="<?php echo htmlspecialchars($p['titre']); ?>"
+                   class="project-img" />
             </div>
-            <h2 class="experience-sub-title project-title">Dynamisation d'un site</h2>
+
+            <h2 class="experience-sub-title project-title">
+              <?php echo htmlspecialchars($p['titre'] ?? ''); ?>
+            </h2>
+
             <div class="btn-container">
-              <button class="btn btn-color-2 project-btn" onclick="window.open('https://github.com/YosraMesbahi/gestion-adherents-club', '_blank')">Github</button>
-              <button class="btn btn-color-2 project-btn" onclick="window.open('https://mesbahi.alwaysdata.net/backoffice-crud/login.php', '_blank')">Live Demo</button>
+
+              <?php if (!empty($p['lien_github'])): ?>
+                <button class="btn btn-color-2 project-btn"
+                  onclick="window.open('<?php echo htmlspecialchars($p['lien_github']); ?>', '_blank')">
+                  Github
+                </button>
+              <?php endif; ?>
+
+              <?php if (!empty($p['lien_demo'])): ?>
+                <button class="btn btn-color-2 project-btn"
+                  onclick="window.open('<?php echo htmlspecialchars($p['lien_demo']); ?>', '_blank')">
+                  Live Demo
+                </button>
+              <?php endif; ?>
+
             </div>
+
           </div>
-          <div class="details-container color-container">
-            <div class="article-container">
-              <img src="./assets/Projet-4.png" alt="Projet 2" class="project-img" />
-            </div>
-            <h2 class="experience-sub-title project-title">Visualisations de données</h2>
-            <div class="btn-container">
-              <button class="btn btn-color-2 project-btn" onclick="window.open('https://github.com/YosraMesbahi/SAE303', '_blank')">Github</button>
-              <button class="btn btn-color-2 project-btn" onclick="window.open('https://yosramesbahi.github.io/SAE303/', '_blank')">Live Demo</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <img src="./assets/arrow.png" alt="Arrow" class="icon arrow" onclick="location.href='#contact'" />
-    </section>
+
+        <?php endwhile; ?>
+      <?php else: ?>
+        <p>Aucun projet pour le moment.</p>
+      <?php endif; ?>
+
+    </div>
+  </div>
+</section>
 
 <section id="contact">
   <p class="section__text__p1">Comment</p>
@@ -234,29 +244,17 @@
     </button>
   </form>
 </section>
-  </main>
 
-  <footer>
-    <nav>
-      <div class="nav-links-container">
-        <ul class="nav-links">
-          <?php
-          $menuItems = getMenuItems($conn);
-          if ($menuItems) {
-              mysqli_data_seek($menuItems, 0);
-              while ($item = mysqli_fetch_assoc($menuItems)) {
-                  echo '<li><a href="' . htmlspecialchars($item['ancre']) . '">'
-                       . htmlspecialchars($item['menu_item']) . '</a></li>';
-              }
-          }
-          ?>
-        </ul>
-      </div>
-    </nav>
-    <p>Copyright &#169; 2026 Yosra Mesbahi. Tous droits réservés.</p>
-  </footer>
+</main>
 
-  <script src="script.js"></script>
+<footer>
+  <p>Copyright © 2026 Yosra Mesbahi</p>
+</footer>
+
 </body>
-<?php mysqli_close($conn); ?>
 </html>
+
+
+
+
+
