@@ -20,7 +20,7 @@ mysqli_close($conn);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion des messages - Back Office</title>
-    <link rel="stylesheet" href="../style-back.css">
+    <link rel="stylesheet" href="../includes/style-back.css">
 </head>
 <body>
 
