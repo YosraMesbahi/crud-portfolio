@@ -115,7 +115,7 @@ $projects = $projet->getAll();
   </div>
 </section>
 
-<!-- 🔥 PROJETS POO -->
+<!-- PROJETS POO -->
 <section id="projects">
   <h1 class="title">Mes projets</h1>
 
@@ -123,6 +123,7 @@ $projects = $projet->getAll();
   // Extrait les types uniques depuis les projets déjà chargés
   $types_list = [];
   if ($projects && $projects->num_rows > 0) {
+    // Parcourt les projets pour collecter les types uniques
       $projects->data_seek(0);
       while ($row = $projects->fetch_assoc()) {
           $t = trim($row['type'] ?? '');
@@ -134,6 +135,7 @@ $projects = $projet->getAll();
   }
   ?>
 
+  <!-- Affiche les boutons de filtre si des types sont disponibles -->
   <?php if (!empty($types_list)): ?>
   <div class="filter-container">
     <button class="filter-btn active" data-filter="all">Tous</button>
@@ -160,6 +162,7 @@ $projects = $projet->getAll();
              WHERE pc.projet_id = ?
              ORDER BY c.type, c.tech"
           );
+
           mysqli_stmt_bind_param($stmt, 'i', $p['id']);
           mysqli_stmt_execute($stmt);
           $comp_result = mysqli_stmt_get_result($stmt);
@@ -169,16 +172,18 @@ $projects = $projet->getAll();
           }
           mysqli_stmt_close($stmt);
           ?>
-
+          <!-- Carte de projet -->
           <div class="details-container color-container project-card"
                data-type="<?php echo htmlspecialchars($p['type'] ?? ''); ?>">
 
+        <!-- Affiche l'image du projet ou une image par défaut si aucune n'est fournie -->
             <div class="article-container">
               <img src="<?php echo htmlspecialchars($p['image'] ?? './assets/default.png'); ?>"
                    alt="<?php echo htmlspecialchars($p['titre']); ?>"
                    class="project-img" />
             </div>
 
+        <!-- Affiche le type du projet s'il est disponible -->
             <?php if (!empty($p['type'])): ?>
               <span class="project-type-badge"><?php echo htmlspecialchars($p['type']); ?></span>
             <?php endif; ?>
@@ -187,6 +192,7 @@ $projects = $projet->getAll();
               <?php echo htmlspecialchars($p['titre'] ?? ''); ?>
             </h2>
 
+        <!-- Affiche les compétences liées au projet -->
             <?php if (!empty($competences)): ?>
               <div class="project-skills">
                 <?php foreach ($competences as $c): ?>
