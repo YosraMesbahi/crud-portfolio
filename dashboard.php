@@ -43,7 +43,7 @@ if (!isset($_SESSION['login'])) {
             </div>
             <div class="dashboard-item">
                 <h2>Messages</h2>
-                <a href="crud-messages.php" class="btn btn-secondary" style="margin-top:0.5rem;">Gérer</a>
+                <a href="messages/crud-messages.php" class="btn btn-secondary" style="margin-top:0.5rem;">Gérer</a>
             </div>
             <div class="dashboard-item">
                 <h2>Navigation</h2>
