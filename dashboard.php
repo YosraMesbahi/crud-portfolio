@@ -27,7 +27,7 @@ if (!isset($_SESSION['login'])) {
         <div class="dashboard-grid">
             <div class="dashboard-item">
                 <h2>Profil</h2>
-                <a href="crud-profil.php" class="btn btn-secondary" style="margin-top:0.5rem;">Gérer</a>
+                <a href="profil/crud-profil.php" class="btn btn-secondary" style="margin-top:0.5rem;">Gérer</a>
             </div>
             <div class="dashboard-item">
                 <h2>Compétences</h2>

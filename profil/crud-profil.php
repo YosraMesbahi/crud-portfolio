@@ -5,7 +5,7 @@ if (!isset($_SESSION['login'])) {
     exit();
 }
 
-include_once('connexion.php');
+include_once('../connexion.php');
 
 $requete_profil = "SELECT * FROM profil WHERE id = 1 LIMIT 1";
 $resultat_profil = mysqli_query($conn, $requete_profil);
@@ -69,7 +69,7 @@ mysqli_close($conn);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion du Profil - Back Office</title>
-    <link rel="stylesheet" href="style-back.css">
+    <link rel="stylesheet" href="../style-back.css">
 </head>
 <body>
     <header class="back-header">
