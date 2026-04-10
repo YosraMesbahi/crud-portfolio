@@ -93,7 +93,6 @@ $projects = $projet->getAll();
 
           if (mysqli_num_rows($req) > 0) {
               echo '<div class="details-container color-container">';
-              echo '<div class="skill-type-badge">' . $type . '</div>';
               echo '<h2 class="experience-sub-title project-title">' . $type . '</h2>';
               echo '<div class="article-container skill-list">';
 
@@ -120,13 +119,59 @@ $projects = $projet->getAll();
 <section id="projects">
   <h1 class="title">Mes projets</h1>
 
+  <?php
+  // Extrait les types uniques depuis les projets déjà chargés
+  $types_list = [];
+  if ($projects && $projects->num_rows > 0) {
+      $projects->data_seek(0);
+      while ($row = $projects->fetch_assoc()) {
+          $t = trim($row['type'] ?? '');
+          if ($t !== '' && !in_array($t, $types_list)) {
+              $types_list[] = $t;
+          }
+      }
+      $projects->data_seek(0);
+  }
+  ?>
+
+  <?php if (!empty($types_list)): ?>
+  <div class="filter-container">
+    <button class="filter-btn active" data-filter="all">Tous</button>
+    <?php foreach ($types_list as $type): ?>
+      <button class="filter-btn" data-filter="<?php echo htmlspecialchars($type); ?>">
+        <?php echo htmlspecialchars($type); ?>
+      </button>
+    <?php endforeach; ?>
+  </div>
+  <?php endif; ?>
+
   <div class="experience-details-container">
-    <div class="about-containers">
+    <div class="about-containers" id="projects-grid">
 
       <?php if ($projects && $projects->num_rows > 0): ?>
         <?php while ($p = $projects->fetch_assoc()): ?>
 
-          <div class="details-container color-container">
+          <?php
+          // Récupère les compétences liées à ce projet
+          $stmt = mysqli_prepare($conn,
+            "SELECT c.tech, c.type
+             FROM competences c
+             INNER JOIN projet_competence pc ON pc.competence_id = c.id
+             WHERE pc.projet_id = ?
+             ORDER BY c.type, c.tech"
+          );
+          mysqli_stmt_bind_param($stmt, 'i', $p['id']);
+          mysqli_stmt_execute($stmt);
+          $comp_result = mysqli_stmt_get_result($stmt);
+          $competences = [];
+          while ($c = mysqli_fetch_assoc($comp_result)) {
+              $competences[] = $c;
+          }
+          mysqli_stmt_close($stmt);
+          ?>
+
+          <div class="details-container color-container project-card"
+               data-type="<?php echo htmlspecialchars($p['type'] ?? ''); ?>">
 
             <div class="article-container">
               <img src="<?php echo htmlspecialchars($p['image'] ?? './assets/default.png'); ?>"
@@ -134,9 +179,23 @@ $projects = $projet->getAll();
                    class="project-img" />
             </div>
 
+            <?php if (!empty($p['type'])): ?>
+              <span class="project-type-badge"><?php echo htmlspecialchars($p['type']); ?></span>
+            <?php endif; ?>
+
             <h2 class="experience-sub-title project-title">
               <?php echo htmlspecialchars($p['titre'] ?? ''); ?>
             </h2>
+
+            <?php if (!empty($competences)): ?>
+              <div class="project-skills">
+                <?php foreach ($competences as $c): ?>
+                  <span class="skill-tag skill-tag--<?php echo strtolower(str_replace(['-', ' '], '', $c['type'])); ?>">
+                    <?php echo htmlspecialchars($c['tech']); ?>
+                  </span>
+                <?php endforeach; ?>
+              </div>
+            <?php endif; ?>
 
             <div class="btn-container">
 
@@ -166,6 +225,30 @@ $projects = $projet->getAll();
     </div>
   </div>
 </section>
+
+<script>
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    // Bouton actif
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const filter = btn.dataset.filter;
+    const cards  = document.querySelectorAll('.project-card');
+
+    cards.forEach(card => {
+      const match = filter === 'all' || card.dataset.type === filter;
+      if (match) {
+        card.classList.remove('card-hidden');
+        card.classList.add('card-visible');
+      } else {
+        card.classList.remove('card-visible');
+        card.classList.add('card-hidden');
+      }
+    });
+  });
+});
+</script>
 
 <section id="video">
   <h1 class="title">Ma dernière production</h1>

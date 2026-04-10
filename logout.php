@@ -1,3 +1,5 @@
+<!--// Détruit la session et redirige vers login.php    -->
+
 <?php
 session_start();
 $_SESSION = array();

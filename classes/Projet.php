@@ -1,3 +1,4 @@
+<!--Classe de gestion des projets-->
 <?php
 
 class Projet {
@@ -8,7 +9,7 @@ class Projet {
         $this->conn = $db;
     }
 
-    // 🔹 LISTER TOUS LES PROJETS
+    // LISTER TOUS LES PROJETS
     public function getAll() {
         $sql = "
             SELECT 
@@ -22,7 +23,7 @@ class Projet {
         return $this->conn->query($sql);
     }
 
-    // 🔹 RÉCUPÉRER UN PROJET
+    // RÉCUPÉRER UN PROJET
     public function getById($id) {
         $id = (int)$id;
 
@@ -32,7 +33,7 @@ class Projet {
         return $result->fetch_assoc();
     }
 
-    // 🔹 AJOUTER UN PROJET
+    // AJOUTER UN PROJET
     public function create($data) {
 
         $sql = "
@@ -51,7 +52,7 @@ class Projet {
         return $this->conn->query($sql);
     }
 
-    // 🔹 MODIFIER UN PROJET
+    // MODIFIER UN PROJET
     public function update($id, $data) {
 
         $id = (int)$id;
@@ -70,7 +71,7 @@ class Projet {
         return $this->conn->query($sql);
     }
 
-    // 🔹 SUPPRIMER UN PROJET
+    // SUPPRIMER UN PROJET
     public function delete($id) {
 
         $id = (int)$id;

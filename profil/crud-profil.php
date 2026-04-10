@@ -30,10 +30,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_FILES['cv']) && $_FILES['cv']['error'] === UPLOAD_ERR_OK) {
         $cv_extension = strtolower(pathinfo($_FILES['cv']['name'], PATHINFO_EXTENSION));
         if ($cv_extension === 'pdf') {
+            // Chemin absolu vers assets/uploads/ depuis la racine du projet
+            $upload_dir  = dirname(__DIR__) . '/assets/uploads/';
+            // Crée le dossier s'il n'existe pas encore
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0755, true);
+            }
             $cv_filename = 'CV-' . time() . '.pdf';
-            $cv_path = './assets/uploads/' . $cv_filename;
-            if (move_uploaded_file($_FILES['cv']['tmp_name'], $cv_path)) {
-                $cv = $cv_path;
+            $cv_abs      = $upload_dir . $cv_filename;
+            // Chemin relatif stocké en base (utilisé depuis index.php à la racine)
+            $cv_web      = './assets/uploads/' . $cv_filename;
+            if (move_uploaded_file($_FILES['cv']['tmp_name'], $cv_abs)) {
+                $cv = $cv_web;
             } else {
                 $message = "Erreur lors de l'upload du CV.";
             }
@@ -103,7 +111,7 @@ mysqli_close($conn);
                             <td><?php echo nl2br(htmlspecialchars($profil['presentation'])); ?></td>
                             <td>
                                 <?php if (!empty($profil['CV'])): ?>
-                                    <a href="<?php echo htmlspecialchars($profil['CV']); ?>" target="_blank">Voir le CV</a>
+                                    <a href="<?php echo htmlspecialchars(str_replace('./', '../', $profil['CV'])); ?>" target="_blank">Voir le CV</a>
                                 <?php else: ?>
                                     <em>Aucun CV</em>
                                 <?php endif; ?>
@@ -137,7 +145,7 @@ mysqli_close($conn);
                     <small style="display:block;margin-top:0.5rem;color:#666;">
                         PDF uniquement. Laissez vide pour conserver le CV actuel.
                         <?php if (!empty($profil['CV'])): ?>
-                            — <a href="<?php echo htmlspecialchars($profil['CV']); ?>" target="_blank">Voir le CV actuel</a>
+                            — <a href="<?php echo htmlspecialchars(str_replace('./', '../', $profil['CV'])); ?>" target="_blank">Voir le CV actuel</a>
                         <?php endif; ?>
                     </small>
                 </div>

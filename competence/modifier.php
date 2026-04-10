@@ -1,8 +1,10 @@
 <?php
 session_start();
+// Redirection vers login.php si l'utilisateur n'est pas connecté
 if (!isset($_SESSION['login'])) { header("Location: ../login.php"); exit(); }
 include_once('../connexion.php');
 
+// Vérification de l'ID de la compétence à modifier
 if (!isset($_GET['id'])) { header("Location: liste.php"); exit(); }
 $id = intval($_GET['id']);
 $comp = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM competences WHERE id = $id LIMIT 1"));
@@ -10,10 +12,12 @@ if (!$comp) { header("Location: liste.php"); exit(); }
 
 $message = "";
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Récupération et sécurisation des données du formulaire
     $tech   = mysqli_real_escape_string($conn, $_POST['tech']);
     $niveau = mysqli_real_escape_string($conn, $_POST['niveau']);
     $type   = mysqli_real_escape_string($conn, $_POST['type']);
     $req    = mysqli_query($conn, "UPDATE competences SET tech='$tech', niveau='$niveau', type='$type' WHERE id=$id");
+   // Message de succès ou d'erreur selon le résultat de la requête
     $message = $req ? "Modifié !" : "Erreur : " . mysqli_error($conn);
     $comp = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM competences WHERE id = $id LIMIT 1"));
 }

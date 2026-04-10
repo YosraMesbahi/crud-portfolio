@@ -360,7 +360,29 @@ section {
   color: var(--white);
 }
 
-/* Badge de type sur chaque carte */
+/* Badges compétences dans les cartes projet */
+.project-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0 1.2rem 0.8rem;
+}
+
+.skill-tag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 2rem;
+  background: var(--border);
+  color: var(--grey-text);
+}
+
+/* Couleur par catégorie */
+.skill-tag--frontend   { background: #e8f0fe; color: #3a5fc8; }
+.skill-tag--backend,
+.skill-tag--backend    { background: #fce8e8; color: #c83a3a; }
+.skill-tag--outils     { background: #e8fce8; color: #2e7d32; }
+.skill-tag--design     { background: #fef3e8; color: #b45309; }
 .project-type-badge {
   display: inline-block;
   font-size: 0.7rem;

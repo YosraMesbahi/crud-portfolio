@@ -1,7 +1,9 @@
 <?php
 session_start();
+// Redirection vers login.php si l'utilisateur n'est pas connecté
 if (!isset($_SESSION['login'])) { header("Location: ../login.php"); exit(); }
 include_once('../connexion.php');
+// Récupération de la liste des compétences
 $liste = mysqli_query($conn, "SELECT * FROM competences ORDER BY type, id DESC");
 mysqli_close($conn);
 ?>
@@ -26,12 +28,14 @@ mysqli_close($conn);
         <div class="back-card">
             <h2>Toutes les compétences</h2>
             <a href="ajouter.php">+ Ajouter</a>
+            <!-- Affichage de la liste des compétences dans un tableau -->
             <?php if (mysqli_num_rows($liste) > 0): ?>
                 <table class="table">
                     <thead>
                         <tr><th>ID</th><th>Type</th><th>Technologie</th><th>Niveau</th><th>Actions</th></tr>
                     </thead>
                     <tbody>
+                        <!-- Boucle pour afficher chaque compétence dans une ligne du tableau -->
                     <?php while ($c = mysqli_fetch_assoc($liste)): ?>
                         <tr>
                             <td><?php echo $c['id']; ?></td>

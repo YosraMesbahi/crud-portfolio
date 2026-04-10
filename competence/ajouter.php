@@ -1,14 +1,17 @@
 <?php
 session_start();
+// Redirection vers login.php si l'utilisateur n'est pas connecté
 if (!isset($_SESSION['login'])) { header("Location: ../login.php"); exit(); }
 include_once('../connexion.php');
 
 $message = "";
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Récupération et sécurisation des données du formulaire
     $tech   = mysqli_real_escape_string($conn, $_POST['tech']);
     $niveau = mysqli_real_escape_string($conn, $_POST['niveau']);
     $type   = mysqli_real_escape_string($conn, $_POST['type']);
     $req    = mysqli_query($conn, "INSERT INTO competences (tech, niveau, type) VALUES ('$tech','$niveau','$type')");
+    // Message de succès ou d'erreur selon le résultat de la requête
     $message = $req ? "Compétence ajoutée !" : "Erreur : " . mysqli_error($conn);
 }
 mysqli_close($conn);
@@ -32,6 +35,7 @@ mysqli_close($conn);
     </header>
     <div class="back-container">
         <?php if ($message): ?>
+            <!-- Affichage du message de succès ou d'erreur -->
             <div class="alert <?php echo strpos($message,'Erreur') !== false ? 'alert-error' : 'alert-success'; ?>">
                 <?php echo $message; ?>
             </div>

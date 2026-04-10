@@ -1,3 +1,4 @@
+<!--Page de connexion pour le back office du portfolio-->
 <?php
 session_start();
 ?>
@@ -13,6 +14,7 @@ session_start();
     <div class="login-container">
         <div class="login-card">
             <h1>Identification</h1>
+
             <form action="verification.php" method="post">
                 <div class="form-group">
                     <label for="login">Identifiant :</label>

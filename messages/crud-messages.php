@@ -56,6 +56,7 @@ mysqli_close($conn);
                     </tr>
                 </thead>
                 <tbody>
+                    <!-- Boucle pour afficher chaque message dans une ligne du tableau -->
                 <?php while ($msg = mysqli_fetch_assoc($liste)): ?>
                     <tr>
                         <td><?php echo $msg['id']; ?></td>

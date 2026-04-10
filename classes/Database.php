@@ -1,3 +1,4 @@
+<!--Classe de connexion à la base de données MySQL via mysqli-->
 <?php
 
 class Database {

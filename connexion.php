@@ -1,3 +1,4 @@
+<!--Connexion à la base de données MySQL via mysqli--> 
 <?php
 $serveur = "mysql-yosra-sae203.alwaysdata.net";
 $utilisateur = "yosra-sae203";
