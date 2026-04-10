@@ -80,7 +80,6 @@ $projects = $projet->getAll();
 
 <!-- COMPETENCES -->
 <section id="experience">
-  <p class="section__text__p1">Découvrez</p>
   <h1 class="title">Mes compétences</h1>
 
   <div class="experience-details-container">
@@ -93,9 +92,10 @@ $projects = $projet->getAll();
           $req = mysqli_query($conn, "SELECT * FROM competences WHERE type='$type'");
 
           if (mysqli_num_rows($req) > 0) {
-              echo '<div class="details-container">';
-              echo '<h2 class="experience-sub-title">' . $type . '</h2>';
-              echo '<div class="article-container">';
+              echo '<div class="details-container color-container">';
+              echo '<div class="skill-type-badge">' . $type . '</div>';
+              echo '<h2 class="experience-sub-title project-title">' . $type . '</h2>';
+              echo '<div class="article-container skill-list">';
 
               while ($c = mysqli_fetch_assoc($req)) {
                   echo '<article>';
@@ -118,7 +118,6 @@ $projects = $projet->getAll();
 
 <!-- 🔥 PROJETS POO -->
 <section id="projects">
-  <p class="section__text__p1">Découvrez</p>
   <h1 class="title">Mes projets</h1>
 
   <div class="experience-details-container">
@@ -165,6 +164,27 @@ $projects = $projet->getAll();
       <?php endif; ?>
 
     </div>
+  </div>
+</section>
+
+<section id="video">
+  <h1 class="title">Ma dernière production</h1>
+
+  <div style="display:flex; justify-content:center; margin-top:2rem;">
+    
+    <div style="width:100%; max-width:800px; position:relative; padding-bottom:56.25%; height:0;">
+      
+      <iframe 
+        src="https://www.youtube.com/embed/CkW7c6UP7vc"
+        title="Ma dernière production"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen
+        style="position:absolute; top:0; left:0; width:100%; height:100%; border-radius:1rem;">
+      </iframe>
+
+    </div>
+
   </div>
 </section>
 
@@ -253,8 +273,3 @@ $projects = $projet->getAll();
 
 </body>
 </html>
-
-
-
-
-
