@@ -3,7 +3,7 @@ include_once('social-media.php');
 include('profil.php'); 
 include('competences.php'); 
 
-// 🔥 POO PROJETS
+// POO PROJETS
 include_once('classes/Database.php');
 include_once('classes/Projet.php');
 
