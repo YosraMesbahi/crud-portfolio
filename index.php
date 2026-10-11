@@ -265,7 +265,7 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
     <div style="width:100%; max-width:800px; position:relative; padding-bottom:56.25%; height:0;">
       
       <iframe 
-        src="https://www.youtube.com/embed/CkW7c6UP7vc"
+        src="https://www.youtube.com/embed/bXxHwdtpQBs"
         title="Ma dernière production"
         frameborder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
